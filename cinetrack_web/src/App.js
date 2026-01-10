@@ -5,6 +5,7 @@ import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import MovieDetailPage from "./components/MovieDetailPage";
 import WatchlistPage from "./components/WatchlistPage";
+import SearchPage from "./components/SearchPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/movie/:id" element={<MovieDetailPage />} />
         <Route path="/watchlist" element={<WatchlistPage />} />
+        <Route path="/search" element={<SearchPage />} />
       </Routes>
     </Router>
   );
