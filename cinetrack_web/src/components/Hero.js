@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Hero = ({ movie }) => {
   if (!movie) return null;
@@ -13,9 +14,12 @@ const Hero = ({ movie }) => {
       <div className="container mx-auto p-6 relative z-10 text-white">
         <h1 className="text-5xl font-bold mb-4">{movie.title}</h1>
         <p className="max-w-xl text-slate-300 line-clamp-3">{movie.overview}</p>
-        <button className="mt-4 bg-orange-600 px-6 py-2 rounded-lg font-bold hover:bg-orange-700">
+        <Link
+          to={`/movie/${movie.id}`}
+          className="bg-primary hover:bg-primaryHover text-white px-8 py-3 rounded-lg font-bold shadow-lg shadow-orange-500/30 transition transform hover:-translate-y-1 inline-flex items-center gap-2"
+        >
           Tonton Trailer
-        </button>
+        </Link>
       </div>
     </div>
   );

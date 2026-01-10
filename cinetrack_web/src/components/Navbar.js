@@ -19,9 +19,12 @@ const Navbar = () => {
             Watchlist
           </Link>
         </div>
-        <button className="text-sm bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700">
+        <Link
+          to="/login"
+          className="text-sm bg-orange-600 text-white px-4 py-2 rounded-full hover:bg-orange-700 transition"
+        >
           Login
-        </button>
+        </Link>
       </div>
     </nav>
   );
