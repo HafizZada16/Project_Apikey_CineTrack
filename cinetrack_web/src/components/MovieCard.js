@@ -1,11 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom"; // <--- Import Link
-import { FaStar } from "react-icons/fa"; // Pastikan install react-icons
+import { Link } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
 
 const MovieCard = ({ movie }) => {
+  // Gunakan movie.tmdb_id jika movie.id kosong (karena database watchlist nyimpannya tmdb_id)
+  const movieId = movie.id || movie.tmdb_id;
+
   return (
-    // Bungkus semuanya dengan Link ke /movie/{ID}
-    <Link to={`/movie/${movie.id}`}>
+    <Link to={`/movie/${movieId}`}>
       <div className="bg-card rounded-xl overflow-hidden shadow-lg hover:shadow-orange-500/10 hover:-translate-y-2 transition duration-300 group cursor-pointer h-full flex flex-col">
         <div className="relative overflow-hidden">
           <img
@@ -13,9 +15,6 @@ const MovieCard = ({ movie }) => {
             alt={movie.title}
             className="w-full h-80 object-cover group-hover:scale-110 transition duration-500"
           />
-          <div className="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded shadow-md">
-            NEW
-          </div>
         </div>
 
         <div className="p-4 flex flex-col flex-grow">
@@ -23,10 +22,15 @@ const MovieCard = ({ movie }) => {
             {movie.title}
           </h3>
           <div className="flex justify-between items-center text-slate-400 text-sm mt-auto">
-            <span>{movie.release_date?.split("-")[0]}</span>
+            {/* Pakai tanda tanya (?) biar gak error kalau datanya null */}
+            <span>{movie.release_date?.split("-")[0] || "Unknown"}</span>
+
             <div className="flex items-center text-primary font-bold gap-1">
               <FaStar className="text-xs" />
-              <span>{movie.vote_average.toFixed(1)}</span>
+              {/* Cek apakah vote_average ada. Kalau tidak ada, sembunyikan atau tulis N/A */}
+              <span>
+                {movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}
+              </span>
             </div>
           </div>
         </div>

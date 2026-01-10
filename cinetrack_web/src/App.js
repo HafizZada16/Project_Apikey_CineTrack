@@ -4,6 +4,7 @@ import HomePage from "./components/HomePage";
 import LoginPage from "./components/LoginPage";
 import RegisterPage from "./components/RegisterPage";
 import MovieDetailPage from "./components/MovieDetailPage";
+import WatchlistPage from "./components/WatchlistPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/movie/:id" element={<MovieDetailPage />} />
+        <Route path="/watchlist" element={<WatchlistPage />} />
       </Routes>
     </Router>
   );
