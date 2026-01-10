@@ -1,0 +1,33 @@
+@startuml CineTrack
+
+!theme plain
+hide circle
+skinparam linetype ortho
+
+' ENTITIES
+ 
+entity "Users" as users {
+  *id : INT <<PK>>
+  --
+  username : VARCHAR(100)
+  email : VARCHAR(255)
+  password : VARCHAR(255)
+  role : ENUM('USER', 'ADMIN')
+  created_at : TIMESTAMP
+}
+
+entity "Watchlists" as watchlists {
+  *id : INT <<PK>>
+  --
+  *user_id : INT <<FK>>
+  tmdb_id : INT
+  title : VARCHAR(255)
+  poster_path : VARCHAR(255)
+  added_at : TIMESTAMP
+}
+
+' RELATIONSHIPS
+
+users ||..o{ watchlists : "memiliki"
+
+@enduml
