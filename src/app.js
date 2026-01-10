@@ -5,6 +5,7 @@ const db = require("./config/database"); // Import koneksi DB
 
 const authRoutes = require("./routes/authRoutes");
 const movieRoutes = require("./routes/movieRoutes");
+const watchlistRoutes = require("./routes/watchlistRoutes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
+app.use("/api/watchlist", watchlistRoutes);
 
 // Test Route (Cek apakah server jalan)
 app.get("/", (req, res) => {
