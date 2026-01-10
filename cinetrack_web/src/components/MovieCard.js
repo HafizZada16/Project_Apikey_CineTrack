@@ -3,8 +3,7 @@ import { Link } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
 
 const MovieCard = ({ movie }) => {
-  // Gunakan movie.tmdb_id jika movie.id kosong (karena database watchlist nyimpannya tmdb_id)
-  const movieId = movie.id || movie.tmdb_id;
+  const movieId = movie.tmdb_id ? movie.tmdb_id : movie.id;
 
   return (
     <Link to={`/movie/${movieId}`}>

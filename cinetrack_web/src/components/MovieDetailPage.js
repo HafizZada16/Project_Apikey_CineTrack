@@ -42,9 +42,12 @@ const MovieDetailPage = () => {
           tmdb_id: movie.id,
           title: movie.title,
           poster_path: movie.poster_path,
+          // TAMBAHAN BARU: Kirim juga tahun dan rating
+          release_date: movie.release_date,
+          vote_average: movie.vote_average,
         },
         {
-          headers: { Authorization: `Bearer ${token}` }, // Lampirkan Token
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setIsSaved(true);

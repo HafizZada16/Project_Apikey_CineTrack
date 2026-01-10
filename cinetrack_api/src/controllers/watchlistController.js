@@ -2,12 +2,10 @@ const db = require("../config/database");
 
 // 1. Tambah ke Favorit
 const addToWatchlist = (req, res) => {
-  // Data dari Body (dikirim frontend)
-  const { tmdb_id, title, poster_path } = req.body;
-  // ID User diambil otomatis dari Token (req.user diset oleh middleware nanti)
+  // Tambahkan release_date dan vote_average di sini
+  const { tmdb_id, title, poster_path, release_date, vote_average } = req.body;
   const user_id = req.user.id;
 
-  // Cek dulu biar gak duplikat
   const checkQuery =
     "SELECT * FROM watchlists WHERE user_id = ? AND tmdb_id = ?";
   db.query(checkQuery, [user_id, tmdb_id], (err, data) => {
@@ -15,10 +13,19 @@ const addToWatchlist = (req, res) => {
     if (data.length > 0)
       return res.status(409).json("Film sudah ada di watchlist!");
 
-    // Masukkan ke Database
+    // Update Query Insert
     const q =
-      "INSERT INTO watchlists (`user_id`, `tmdb_id`, `title`, `poster_path`) VALUES (?)";
-    const values = [user_id, tmdb_id, title, poster_path];
+      "INSERT INTO watchlists (`user_id`, `tmdb_id`, `title`, `poster_path`, `release_date`, `vote_average`) VALUES (?)";
+
+    // Update Values
+    const values = [
+      user_id,
+      tmdb_id,
+      title,
+      poster_path,
+      release_date,
+      vote_average,
+    ];
 
     db.query(q, [values], (err, data) => {
       if (err) return res.status(500).json(err);
