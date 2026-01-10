@@ -2,62 +2,88 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "./Navbar";
-import { FaPlus, FaCheck } from "react-icons/fa"; // Import Icon
+import { FaPlus, FaTrash } from "react-icons/fa"; // Ganti FaCheck jadi FaTrash
 
 const MovieDetailPage = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSaved, setIsSaved] = useState(false); // Status tombol
+  const [isSaved, setIsSaved] = useState(false); // Status apakah sudah di watchlist?
 
   useEffect(() => {
-    const fetchDetail = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
+        // 1. Ambil Detail Film
+        const movieRes = await axios.get(
           `http://localhost:3000/api/movies/${id}`
         );
-        setMovie(response.data);
+        setMovie(movieRes.data);
+
+        // 2. Cek Status Watchlist (Hanya jika user sudah login)
+        const token = localStorage.getItem("token");
+        if (token) {
+          const watchlistRes = await axios.get(
+            "http://localhost:3000/api/watchlist",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          // Cari apakah ID film ini ada di dalam daftar watchlist user
+          // Gunakan '==' biar aman (jika satu string satu number)
+          const found = watchlistRes.data.find((item) => item.tmdb_id == id);
+          if (found) {
+            setIsSaved(true);
+          }
+        }
+
         setLoading(false);
       } catch (error) {
-        console.error("Gagal ambil detail:", error);
+        console.error("Error:", error);
         setLoading(false);
       }
     };
-    fetchDetail();
+
+    fetchData();
   }, [id]);
 
-  // --- FUNGSI TAMBAH KE WATCHLIST ---
-  const saveToWatchlist = async () => {
-    const token = localStorage.getItem("token"); // Ambil tiket dari Login
-
+  // --- FUNGSI TOGGLE (TAMBAH / HAPUS) ---
+  const handleWatchlist = async () => {
+    const token = localStorage.getItem("token");
     if (!token) {
-      alert("Eits, Login dulu dong bos! 😅");
+      alert("Login dulu dong bos! 😅");
       return;
     }
 
     try {
-      await axios.post(
-        "http://localhost:3000/api/watchlist",
-        {
-          tmdb_id: movie.id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          // TAMBAHAN BARU: Kirim juga tahun dan rating
-          release_date: movie.release_date,
-          vote_average: movie.vote_average,
-        },
-        {
+      if (isSaved) {
+        // A. JIKA SUDAH ADA -> HAPUS (REMOVE)
+        await axios.delete(`http://localhost:3000/api/watchlist/${movie.id}`, {
           headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setIsSaved(true);
-      alert("Berhasil masuk Watchlist! ✅");
-    } catch (error) {
-      if (error.response && error.response.status === 409) {
-        alert("Film ini sudah ada di Watchlist kamu! 😎");
+        });
+        setIsSaved(false); // Ubah status jadi belum disimpan
+        alert("Berhasil dihapus dari Watchlist 🗑️");
       } else {
-        alert("Gagal menyimpan. Coba lagi.");
+        // B. JIKA BELUM ADA -> TAMBAH (ADD)
+        await axios.post(
+          "http://localhost:3000/api/watchlist",
+          {
+            tmdb_id: movie.id,
+            title: movie.title,
+            poster_path: movie.poster_path,
+            release_date: movie.release_date,
+            vote_average: movie.vote_average,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setIsSaved(true); // Ubah status jadi tersimpan
+        alert("Berhasil masuk Watchlist! ✅");
       }
+    } catch (error) {
+      console.error(error);
+      alert("Gagal mengubah status watchlist.");
     }
   };
 
@@ -72,6 +98,7 @@ const MovieDetailPage = () => {
     <div className="bg-slate-900 min-h-screen text-white">
       <Navbar />
 
+      {/* BACKDROP */}
       <div
         className="relative w-full h-[60vh] bg-cover bg-center"
         style={{
@@ -83,6 +110,7 @@ const MovieDetailPage = () => {
 
       <div className="container mx-auto px-6 -mt-32 relative z-10">
         <div className="flex flex-col md:flex-row gap-8 items-start">
+          {/* POSTER */}
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             alt={movie.title}
@@ -96,20 +124,23 @@ const MovieDetailPage = () => {
               <span className="flex items-center gap-1 text-orange-500 font-bold">
                 ★ {movie.vote_average?.toFixed(1)}
               </span>
+              <span className="bg-orange-600 px-2 py-1 rounded text-white text-xs">
+                {movie.genres?.map((g) => g.name).join(", ")}
+              </span>
             </div>
 
-            {/* --- TOMBOL ADD TO WATCHLIST --- */}
+            {/* --- TOMBOL DINAMIS (ADD / REMOVE) --- */}
             <button
-              onClick={saveToWatchlist}
-              className={`mb-6 px-6 py-2 rounded-full font-bold flex items-center gap-2 transition ${
+              onClick={handleWatchlist}
+              className={`mb-6 px-6 py-2 rounded-full font-bold flex items-center gap-2 transition shadow-lg ${
                 isSaved
-                  ? "bg-green-600 text-white cursor-default"
-                  : "bg-slate-700 hover:bg-slate-600 text-white border border-slate-500"
+                  ? "bg-red-600 hover:bg-red-700 text-white ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900" // Style Tombol Hapus
+                  : "bg-orange-600 hover:bg-orange-700 text-white" // Style Tombol Tambah
               }`}
             >
               {isSaved ? (
                 <>
-                  <FaCheck /> Tersimpan
+                  <FaTrash /> Remove from Watchlist
                 </>
               ) : (
                 <>
@@ -123,6 +154,7 @@ const MovieDetailPage = () => {
               {movie.overview || "Tidak ada sinopsis."}
             </p>
 
+            {/* TRAILER */}
             {movie.trailer_embed && (
               <div className="mt-8">
                 <h3 className="text-xl font-bold text-white mb-4">
