@@ -54,7 +54,6 @@ const login = (req, res) => {
         expiresIn: "12h", // Token kadaluwarsa dalam 12 jam
       }
     );
-
     // Kirim token ke user, tapi jangan kirim passwordnya
     const { password: userPass, ...otherInfo } = data[0];
 
