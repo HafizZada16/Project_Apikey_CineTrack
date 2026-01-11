@@ -15,3 +15,6 @@ DetailMoviePage
 
 WatchlistPage
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3647c094-b792-4ba7-9420-c46eeb8ca78e" />
+
+Dashboard Admin
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4ed70299-407c-439f-91b2-5133c5e31053" />
