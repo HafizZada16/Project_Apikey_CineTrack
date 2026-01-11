@@ -7,6 +7,15 @@ require("dotenv").config();
 const register = (req, res) => {
   const { username, email, password } = req.body;
 
+  // --- VALIDASI BACKEND (Security Layer) ---
+  if (!username || username.length < 3) {
+    return res.status(400).json("Username minimal 3 karakter!");
+  }
+  if (!password || password.length < 6) {
+    return res.status(400).json("Password minimal 6 karakter!");
+  }
+  // ----------------------------------------
+
   // Cek dulu apakah email sudah ada?
   const checkQuery = "SELECT * FROM users WHERE email = ?";
   db.query(checkQuery, [email], (err, data) => {

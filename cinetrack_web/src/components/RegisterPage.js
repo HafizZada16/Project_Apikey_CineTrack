@@ -14,6 +14,25 @@ const RegisterPage = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    // --- 1. VALIDASI INPUT (LOGIKA BARU) ---
+    if (username.length < 3) {
+      setNotification({
+        message: "Username kependekan! Minimal 3 karakter ya.",
+        type: "error",
+      });
+      return; // Stop, jangan lanjut ke axios
+    }
+
+    if (password.length < 6) {
+      setNotification({
+        message: "Password kurang aman! Minimal 6 karakter.",
+        type: "error",
+      });
+      return; // Stop
+    }
+    // ---------------------------------------
+
     try {
       await axios.post("http://localhost:3000/api/auth/register", {
         username,
