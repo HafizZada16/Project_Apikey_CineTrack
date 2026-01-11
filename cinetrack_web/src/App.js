@@ -6,6 +6,7 @@ import RegisterPage from "./components/RegisterPage";
 import MovieDetailPage from "./components/MovieDetailPage";
 import WatchlistPage from "./components/WatchlistPage";
 import SearchPage from "./components/SearchPage";
+import AdminDashboard from "./components/AdminDashboard";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/movie/:id" element={<MovieDetailPage />} />
         <Route path="/watchlist" element={<WatchlistPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );
