@@ -18,3 +18,62 @@ WatchlistPage
 
 Dashboard Admin
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4ed70299-407c-439f-91b2-5133c5e31053" />
+
+# 🎬 CineTrack - Movie Discovery & Watchlist App
+
+**CineTrack** adalah aplikasi web fullstack untuk mencari informasi film, melihat detail (trailer, cast), dan menyimpan film favorit ke dalam Watchlist pribadi. Aplikasi ini menggunakan data *real-time* dari TMDB API.
+
+---
+
+## 🚀 Fitur Utama
+
+### 🌟 User (Pengguna Umum)
+* **Homepage Dinamis:** Hero section dengan *auto-slider* dan daftar film populer.
+* **Pencarian Film:** Cari film berdasarkan judul.
+* **Detail Film Lengkap:** Sinopsis, Rating, Durasi, Genre, **Trailer Video**, **Daftar Pemeran (Cast)**, dan **Rekomendasi Film Serupa**.
+* **Autentikasi:** Register & Login (aman menggunakan JWT).
+* **Watchlist Personal:** Simpan film favorit (Add) dan hapus (Remove) dari daftar tontonan.
+
+### 🛡️ Admin
+* **Dashboard Admin:** Halaman khusus untuk manajemen konten atau pengguna (jika akses admin diberikan).
+
+---
+
+## 🛠️ Teknologi yang Digunakan
+
+**Frontend:**
+* React.js (v18)
+* Tailwind CSS (Styling & Responsive Design)
+* Axios (API Request)
+* React Router DOM (Navigasi)
+* React Icons
+
+**Backend:**
+* Node.js & Express.js
+* MySQL (Database)
+* Sequelize (ORM)
+* JWT (JSON Web Token untuk Autentikasi)
+* Bcrypt (Enkripsi Password)
+
+**API Eksternal:**
+* The Movie Database (TMDB) API
+
+---
+
+## 📂 Struktur Project
+
+```bash
+root/
+├── cinetrack_api/     # Backend (Server & Database Logic)
+│   ├── src/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   └── app.js
+│   └── .env           # (Perlu dibuat manual)
+│
+└── cinetrack_web/     # Frontend (React UI)
+    ├── src/
+    │   ├── components/
+    │   └── App.js
+    └── tailwind.config.js
