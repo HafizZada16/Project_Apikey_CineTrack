@@ -10,7 +10,7 @@ const getPopularMovies = async (req, res) => {
     const response = await axios.get(`${BASE_URL}/movie/popular`, {
       params: {
         api_key: API_KEY,
-        language: "id-ID", // Supaya sinopsis bahasa Indonesia
+        language: "id-ID",
         page: 1,
       },
     });
@@ -22,7 +22,7 @@ const getPopularMovies = async (req, res) => {
 
 // 2. Cari Film berdasarkan Judul
 const searchMovies = async (req, res) => {
-  const query = req.query.q; // Contoh: ?q=avatar
+  const query = req.query.q;
 
   if (!query) {
     return res.status(400).json({ message: "Kata kunci pencarian harus ada!" });
@@ -42,32 +42,52 @@ const searchMovies = async (req, res) => {
   }
 };
 
-// 3. Ambil Detail Film (Termasuk Trailer)
+// 3. Ambil Detail Film (Lengkap dengan Trailer, Cast, & Rekomendasi)
 const getMovieDetail = async (req, res) => {
-  const { id } = req.params; // Ambil ID dari URL
+  const { id } = req.params;
 
   try {
-    // Kita request 2 hal sekaligus: Detail Film & Video Trailer
-    const [movieRes, videoRes] = await Promise.all([
-      axios.get(`${BASE_URL}/movie/${id}`, {
-        params: { api_key: API_KEY, language: "id-ID" },
-      }),
-      axios.get(`${BASE_URL}/movie/${id}/videos`, {
-        params: { api_key: API_KEY },
-      }),
-    ]);
+    // Kita request 4 hal sekaligus menggunakan Promise.all
+    const [movieRes, videoRes, creditsRes, recommendationsRes] =
+      await Promise.all([
+        // 1. Detail Film Utama
+        axios.get(`${BASE_URL}/movie/${id}`, {
+          params: { api_key: API_KEY, language: "id-ID" },
+        }),
+        // 2. Video Trailer
+        axios.get(`${BASE_URL}/movie/${id}/videos`, {
+          params: { api_key: API_KEY },
+        }),
+        // 3. Credits (Pemeran/Cast) -- BARU
+        axios.get(`${BASE_URL}/movie/${id}/credits`, {
+          params: { api_key: API_KEY },
+        }),
+        // 4. Rekomendasi Film -- BARU
+        axios.get(`${BASE_URL}/movie/${id}/recommendations`, {
+          params: { api_key: API_KEY, language: "id-ID" },
+        }),
+      ]);
 
     const movie = movieRes.data;
     const videos = videoRes.data.results;
+    const credits = creditsRes.data; // Isinya ada .cast
+    const recommendations = recommendationsRes.data; // Isinya ada .results
 
-    // Cari video yang tipe-nya "Trailer" dan site-nya "YouTube"
+    // Cari video trailer
     const trailer = videos.find(
       (vid) => vid.site === "YouTube" && vid.type === "Trailer"
     );
 
-    // Gabungkan data
+    // Masukkan URL trailer ke objek movie
+    movie.trailer_embed = trailer
+      ? `https://www.youtube.com/embed/${trailer.key}`
+      : null;
+
+    // Gabungkan semua data ke dalam satu objek result
     const result = {
       ...movie,
+      credits: credits, // Masukkan data pemeran ke sini
+      recommendations: recommendations, // Masukkan data rekomendasi ke sini
       trailer_url: trailer
         ? `https://www.youtube.com/watch?v=${trailer.key}`
         : null,
