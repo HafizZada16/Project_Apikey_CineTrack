@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "./Navbar";
-import { FaPlus, FaTrash } from "react-icons/fa"; // Ganti FaCheck jadi FaTrash
+import { FaPlus, FaTrash } from "react-icons/fa"; // Pakai icon Trash biar jelas
+import Notification from "./Notification";
 
 const MovieDetailPage = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSaved, setIsSaved] = useState(false); // Status apakah sudah di watchlist?
+  const [isSaved, setIsSaved] = useState(false); // Status: false (belum) / true (sudah)
+
+  // State Notifikasi
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,7 +23,8 @@ const MovieDetailPage = () => {
         );
         setMovie(movieRes.data);
 
-        // 2. Cek Status Watchlist (Hanya jika user sudah login)
+        // 2. CEK STATUS WATCHLIST DI SERVER (PENTING!)
+        // Kita harus tahu pas halaman diload: film ini udah disimpen user belum?
         const token = localStorage.getItem("token");
         if (token) {
           const watchlistRes = await axios.get(
@@ -29,17 +34,18 @@ const MovieDetailPage = () => {
             }
           );
 
-          // Cari apakah ID film ini ada di dalam daftar watchlist user
-          // Gunakan '==' biar aman (jika satu string satu number)
-          const found = watchlistRes.data.find((item) => item.tmdb_id == id);
+          // Cari apakah ID film ini ada di list user
+          const found = watchlistRes.data.some(
+            (item) => String(item.tmdb_id) === String(id)
+          );
           if (found) {
-            setIsSaved(true);
+            setIsSaved(true); // Kalau ketemu, set status jadi TRUE (Tersimpan)
           }
         }
 
         setLoading(false);
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
@@ -47,24 +53,31 @@ const MovieDetailPage = () => {
     fetchData();
   }, [id]);
 
-  // --- FUNGSI TOGGLE (TAMBAH / HAPUS) ---
+  // --- FUNGSI TOGGLE (ADD / REMOVE) ---
   const handleWatchlist = async () => {
     const token = localStorage.getItem("token");
+
     if (!token) {
-      alert("Login dulu dong bos! 😅");
+      setNotification({ message: "Login dulu dong bos! 😅", type: "error" });
       return;
     }
 
     try {
       if (isSaved) {
-        // A. JIKA SUDAH ADA -> HAPUS (REMOVE)
+        // === LOGIKA HAPUS (REMOVE) ===
+        // Kalau statusnya 'isSaved' == true, berarti user minta HAPUS
         await axios.delete(`http://localhost:3000/api/watchlist/${movie.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setIsSaved(false); // Ubah status jadi belum disimpan
-        alert("Berhasil dihapus dari Watchlist 🗑️");
+
+        setIsSaved(false); // Ubah status tombol jadi "Add" lagi
+        setNotification({
+          message: "Dihapus dari Watchlist 🗑️",
+          type: "success",
+        });
       } else {
-        // B. JIKA BELUM ADA -> TAMBAH (ADD)
+        // === LOGIKA SIMPAN (ADD) ===
+        // Kalau statusnya 'isSaved' == false, berarti user minta SIMPAN
         await axios.post(
           "http://localhost:3000/api/watchlist",
           {
@@ -78,12 +91,16 @@ const MovieDetailPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setIsSaved(true); // Ubah status jadi tersimpan
-        alert("Berhasil masuk Watchlist! ✅");
+
+        setIsSaved(true); // Ubah status tombol jadi "Remove"
+        setNotification({
+          message: "Berhasil masuk Watchlist! ✅",
+          type: "success",
+        });
       }
     } catch (error) {
       console.error(error);
-      alert("Gagal mengubah status watchlist.");
+      setNotification({ message: "Gagal memproses request.", type: "error" });
     }
   };
 
@@ -95,8 +112,17 @@ const MovieDetailPage = () => {
     );
 
   return (
-    <div className="bg-slate-900 min-h-screen text-white">
+    <div className="bg-slate-900 min-h-screen text-white relative">
       <Navbar />
+
+      {/* Pop-up Notifikasi */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
 
       {/* BACKDROP */}
       <div
@@ -124,25 +150,24 @@ const MovieDetailPage = () => {
               <span className="flex items-center gap-1 text-orange-500 font-bold">
                 ★ {movie.vote_average?.toFixed(1)}
               </span>
-              <span className="bg-orange-600 px-2 py-1 rounded text-white text-xs">
-                {movie.genres?.map((g) => g.name).join(", ")}
-              </span>
             </div>
 
-            {/* --- TOMBOL DINAMIS (ADD / REMOVE) --- */}
+            {/* --- TOMBOL TOGGLE (ADD / REMOVE) --- */}
             <button
               onClick={handleWatchlist}
               className={`mb-6 px-6 py-2 rounded-full font-bold flex items-center gap-2 transition shadow-lg ${
                 isSaved
-                  ? "bg-red-600 hover:bg-red-700 text-white ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900" // Style Tombol Hapus
-                  : "bg-orange-600 hover:bg-orange-700 text-white" // Style Tombol Tambah
+                  ? "bg-red-600 hover:bg-red-700 text-white ring-2 ring-red-500 ring-offset-2 ring-offset-slate-900" // WARNA MERAH (REMOVE)
+                  : "bg-orange-600 hover:bg-orange-700 text-white" // WARNA ORANGE (ADD)
               }`}
             >
               {isSaved ? (
+                // Tampilan kalau sudah disimpan (Tombol Hapus)
                 <>
                   <FaTrash /> Remove from Watchlist
                 </>
               ) : (
+                // Tampilan kalau belum disimpan (Tombol Tambah)
                 <>
                   <FaPlus /> Add to Watchlist
                 </>
